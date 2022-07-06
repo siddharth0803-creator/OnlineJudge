@@ -23,15 +23,22 @@ def Description(request, problem_id):
         input_part = request.POST['input']
         y = input_part
         #input_part = input_part.replace("\n"," ").split(" ")
-        def input():
-            a = input_part[0]
-            del input_part[0]
-            return a
+        #def input():
+            #a = input_part[0]
+            #del input_part[0]
+            #return a
         try:
             cpp=open('code.cpp','w')
             cpp.write(codearea)
-            file=open('file.txt','w')
-            subprocess.run(['g++','code.cpp','-o','a.out'],capture_output=True,shell=True,text=True,input=input_part,check=True,timeout=1)
+            cpp.close()
+            out=subprocess.run(['g++','code.cpp','-o','a.out'],capture_output=True,shell=True,text=True,input=input_part,check=True,timeout=1)
+            result=out.stdout
+            if(out.returncode!=0):
+                    print('comp err')
+                    return HttpResponse('comp err')
+            else:
+                print(result)
+                return HttpResponse('success')
             #subprocess.call("dir",shell=True)
         except Exception as e:
             output=e
