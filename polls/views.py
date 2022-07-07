@@ -21,6 +21,7 @@ def Description(request, problem_id):
     if request.method=="POST":
         codearea=request.POST['codearea']
         input_part = request.POST['input']
+        input=bytes(input_part, 'utf-8')
         y = input_part
         #input_part = input_part.replace("\n"," ").split(" ")
         #def input():
@@ -31,14 +32,13 @@ def Description(request, problem_id):
             cpp=open('code.cpp','w')
             cpp.write(codearea)
             cpp.close()
-            out=subprocess.run(['g++','code.cpp','-o','a.out'],capture_output=True,shell=True,text=True,input=input_part,check=True,timeout=1)
-            result=out.stdout
+            subprocess.run(['g++','code.cpp','-o','a.exe'])
+            out = subprocess.run(['a.exe'], capture_output=True, input = input, timeout=1)
+            output = out.stdout.decode("utf-8")
+            #out=subprocess.run(['g++','-o','a.exe','code.cpp'], capture_output=True, input=input_part,shell=True, text=True, check=True, timeout=1)
             if(out.returncode!=0):
                     print('comp err')
                     return HttpResponse('comp err')
-            else:
-                print(result)
-                return HttpResponse('success')
             #subprocess.call("dir",shell=True)
         except Exception as e:
             output=e
@@ -69,24 +69,26 @@ def Result(request, problem_id):
     verdict="true"
     for value in io:
         input_part = value.input
+        input=bytes(input_part, 'utf-8')
         y = input_part
-        input_part = input_part.replace("\n"," ").split(" ")
-        def input():
-            a = input_part[0]
-            del input_part[0]
-            return a
+        #input_part = input_part.replace("\n"," ").split(" ")
+        #def input():
+            #a = input_part[0]
+            #del input_part[0]
+            #return a
         try:
-            original_stdout = sys.stdout
-            sys.stdout = open('file.txt','w')
-            exec(codearea)
-            sys.stdout.close()
-            sys.stdout =original_stdout
-
-            output= open('file.txt','r').read()
-            output_list.append(output.splitlines())
+            subprocess.run(['g++','code.cpp','-o','a.exe'])
+            out = subprocess.run(['a.exe'], capture_output=True, input = input, timeout=1)
+            output = out.stdout.decode("utf-8").split(" ")
+            #out=subprocess.run(['g++','-o','a.exe','code.cpp'], capture_output=True, input=input_part,shell=True, text=True, check=True, timeout=1)
+            if(out.returncode!=0):
+                    print('comp err')
+                    return HttpResponse('comp err')
         except Exception as e:
-            sys.stdout= original_stdout
             output=e
+        output_list.append(output)
+
+
     for p in io:
         test_output.append(p.output.replace("\n"," ").split(" "))
 
